@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Coven Aligner</title>
+<meta name="theme-color" content="#1a1022">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coven Aligner">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a1022; --panel:#251731; --panel2:#2f1f3d; --line:#3d2a4d;
+  --gold:#d4ad5a; --gold-deep:#a8822f; --text:#efe6d6; --muted:#a896b4;
+  --spirit:#b89be0; --body:#e39a8a; --work:#d4ad5a; --kegel:#8fc9b8; --self:#a896b4;
+  --display:'Cinzel', 'Trajan Pro', Georgia, serif;
+  --sans:'Jost', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f2ecf5; --panel:#ffffff; --panel2:#ebe2f0; --line:#d9cce2;
+    --gold:#9a7424; --gold-deep:#7a5a16; --text:#2a1a35; --muted:#6e5c7a;
+    --spirit:#7a55b5; --body:#b5574a; --work:#9a7424; --kegel:#3d8a75; --self:#6e5c7a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1a1022; --panel:#251731; --panel2:#2f1f3d; --line:#3d2a4d;
+  --gold:#d4ad5a; --gold-deep:#a8822f; --text:#efe6d6; --muted:#a896b4;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%; scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); font-size:16px; line-height:1.45; -webkit-font-smoothing:antialiased}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible, input:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+.wrap{max-width:560px; margin:0 auto; padding:16px 16px 110px}
+
+/* Hero: the 30-day cycle ring */
+.hero{display:flex; flex-direction:column; align-items:center; padding:8px 0 4px}
+.ring{width:min(84vw,320px); height:auto; display:block}
+.ring .dot{cursor:pointer; transition:r .2s}
+.ring text{font-family:var(--display); fill:var(--text)}
+.title{font-family:var(--display); font-weight:700; letter-spacing:.04em; font-size:1.15rem; margin:4px 0 0; color:var(--gold); text-align:center}
+.dates{color:var(--muted); font-size:.9rem; margin:2px 0 0; text-align:center}
+
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:18px 0 6px}
+.stat{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px 8px; text-align:center}
+.stat b{display:block; font-family:var(--display); font-size:1.3rem; color:var(--gold)}
+.stat span{font-size:.78rem; color:var(--muted)}
+
+.daynav{display:flex; align-items:center; justify-content:space-between; margin:20px 0 10px}
+.daynav h2{font-family:var(--display); font-size:1.25rem; margin:0}
+.daynav .sub{color:var(--muted); font-size:.85rem}
+.navbtn{background:var(--panel); border:1px solid var(--line); border-radius:999px; width:40px; height:40px; font-size:1.1rem}
+.navbtn:disabled{opacity:.35; cursor:default}
+
+/* Kegel card */
+.kegel{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:14px; margin-bottom:16px}
+.kegel .count{font-family:var(--display); font-size:1.8rem; color:var(--kegel); min-width:84px}
+.kegel .count small{font-size:.9rem; color:var(--muted)}
+.kegel .info{flex:1; font-size:.85rem; color:var(--muted)}
+.kbar{display:flex; gap:4px; margin-top:6px}
+.kbar i{flex:1; height:6px; border-radius:3px; background:var(--line)}
+.kbar i.on{background:var(--kegel)}
+.skool .kbar{background:var(--line); border-radius:3px; height:6px; gap:0}
+.skool .kbar i{height:6px; border-radius:3px}
+.logset{background:var(--kegel); color:var(--bg); border:0; border-radius:10px; padding:10px 12px; font-weight:600; font-size:.85rem; white-space:nowrap}
+.logset:disabled{opacity:.4}
+
+/* Timeline */
+.timeline{list-style:none; margin:0; padding:0; position:relative}
+.timeline::before{content:""; position:absolute; left:58px; top:6px; bottom:6px; width:1px; background:var(--line)}
+.item{display:grid; grid-template-columns:50px 18px 1fr; gap:0 8px; padding:8px 0; align-items:start}
+.time{font-size:.8rem; color:var(--muted); text-align:right; padding-top:3px; font-variant-numeric:tabular-nums}
+.check{width:18px; height:18px; margin-top:3px; border-radius:50%; border:2px solid var(--c,var(--muted)); background:var(--bg); position:relative; z-index:1; padding:0}
+.check[aria-checked="true"]{background:var(--c)}
+.check[aria-checked="true"]::after{content:""; position:absolute; left:4px; top:1px; width:5px; height:9px; border:solid var(--bg); border-width:0 2px 2px 0; transform:rotate(45deg)}
+.body{min-width:0}
+.body .name{font-weight:500; background:none; border:0; padding:0; text-align:left; display:block}
+.item.done .name{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line)}
+.body .desc{font-size:.85rem; color:var(--muted); margin-top:1px}
+.body .span{font-size:.75rem; color:var(--c); margin-top:2px}
+.note{width:100%; margin-top:6px; background:var(--panel); border:1px solid var(--line); border-radius:8px; color:var(--text); font:inherit; font-size:.88rem; padding:8px 10px}
+.note::placeholder{color:var(--muted)}
+
+/* Workout */
+.card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px}
+.card h3{font-family:var(--display); font-size:1.1rem; margin:0 0 2px; color:var(--body)}
+.card .lead{color:var(--muted); font-size:.88rem; margin:0 0 12px}
+.ex{display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-top:1px solid var(--line); font-size:.95rem}
+.ex:first-of-type{border-top:0}
+.ex span:last-child{color:var(--gold); white-space:nowrap; font-variant-numeric:tabular-nums}
+.ex .how{display:block; color:var(--muted); font-size:.8rem}
+.prog{background:var(--panel2); border-radius:10px; padding:10px 12px; font-size:.85rem; margin-top:12px}
+.goal{display:flex; align-items:center; gap:12px; padding:10px 0; border-top:1px solid var(--line)}
+.goal:first-child{border-top:0}
+.goal .num{font-family:var(--display); color:var(--gold); width:18px; text-align:center}
+.goal .check{--c:var(--gold); margin-top:0; flex:none}
+.goal input{flex:1; min-width:0; background:var(--panel2); border:1px solid var(--line); border-radius:8px; color:var(--text); font:inherit; padding:10px}
+.goal.done input{text-decoration:line-through; color:var(--muted)}
+.rot{display:grid; grid-template-columns:1fr; gap:6px}
+.rot button{display:flex; justify-content:space-between; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px 12px; text-align:left; font-size:.9rem}
+.rot button[aria-current="true"]{border-color:var(--body)}
+.rot small{color:var(--muted)}
+
+/* 30-day grid */
+.grid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px}
+.cell{aspect-ratio:1; border-radius:10px; border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.8rem; position:relative; overflow:hidden; padding:0}
+.cell b{font-family:var(--display); font-size:1rem; position:relative}
+.cell em{font-style:normal; font-size:.65rem; color:var(--muted); position:relative}
+.cell .fill{position:absolute; left:0; right:0; bottom:0; background:var(--gold); opacity:.28}
+.cell[aria-current="true"]{border-color:var(--gold); border-width:2px}
+.cell.future{opacity:.5}
+.settings{display:flex; flex-direction:column; gap:10px; margin-top:6px}
+.settings label{font-size:.9rem; color:var(--muted); display:flex; justify-content:space-between; align-items:center; gap:10px}
+.settings input{background:var(--panel2); border:1px solid var(--line); border-radius:8px; color:var(--text); padding:8px; font:inherit}
+.ghost{background:none; border:1px solid var(--line); border-radius:10px; padding:10px; color:var(--muted); font-size:.85rem}
+.sync{font-size:.75rem; color:var(--muted); text-align:center; margin-top:16px}
+
+/* Tabs */
+.tabs{position:fixed; left:0; right:0; bottom:0; padding-bottom:env(safe-area-inset-bottom,0px); background:var(--panel); border-top:1px solid var(--line); display:flex; justify-content:center; z-index:5}
+.tabs div{display:flex; max-width:560px; width:100%}
+.tabs button{flex:1; background:none; border:0; padding:12px 4px 14px; font-size:.85rem; color:var(--muted); font-weight:500}
+.tabs button[aria-selected="true"]{color:var(--gold)}
+.tabs button[aria-selected="true"]::before{content:""; display:block; width:24px; height:2px; background:var(--gold); margin:0 auto 6px; border-radius:2px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <svg class="ring" id="ring" viewBox="0 0 320 320" role="img" aria-label="30-day progress ring"></svg>
+    <p class="title">The Coven Aligner</p>
+    <p class="dates" id="dates"></p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><b id="sStreak">0</b><span>day streak</span></div>
+    <div class="stat"><b id="sKegel">0</b><span>kegels total</span></div>
+    <div class="stat"><b id="sWork">0</b><span>workouts done</span></div>
+  </div>
+
+  <div class="daynav">
+    <button class="navbtn" id="prev" aria-label="Previous day">‹</button>
+    <div style="text-align:center"><h2 id="dayTitle">Day 1</h2><div class="sub" id="daySub"></div></div>
+    <button class="navbtn" id="next" aria-label="Next day">›</button>
+  </div>
+
+  <!-- TODAY -->
+  <section id="tab-today">
+    <div class="kegel">
+      <div class="count" id="kCount">0<small>/100</small></div>
+      <div class="info">Kegels today, 4 sets of 25
+        <div class="kbar" id="kBar"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <button class="logset" id="kLog">Log a set</button>
+    </div>
+    <div class="kegel skool">
+      <div class="count" id="mCount" style="color:var(--gold)">0<small>/70</small></div>
+      <div class="info">Skool members at $7.77/mo
+        <div id="mMoney"></div>
+        <div class="kbar"><i id="mBar" style="flex:none;background:var(--gold);width:0"></i></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="navbtn" id="mMinus" aria-label="Remove a member">−</button>
+        <button class="navbtn" id="mPlus" aria-label="Add a member" style="background:var(--gold);color:var(--bg);border:0">+</button>
+      </div>
+    </div>
+    <ol class="timeline" id="timeline"></ol>
+  </section>
+
+  <!-- GOALS -->
+  <section id="tab-goals" hidden>
+    <div class="card">
+      <h3 style="color:var(--gold)">Today's 3 goals</h3>
+      <p class="lead">The three things that would make today a win. Check them off as you go.</p>
+      <div id="goals"></div>
+      <p class="lead" id="goalsDone" style="margin:12px 0 0"></p>
+    </div>
+  </section>
+
+  <!-- WORKOUT -->
+  <section id="tab-workout" hidden>
+    <div class="card" id="woCard"></div>
+    <div class="card" id="dailyCard"></div>
+    <div class="card">
+      <h3 style="color:var(--gold)">The 7-day rotation</h3>
+      <p class="lead">Repeats four times over the 30 days. Tap one to preview it.</p>
+      <div class="rot" id="rot"></div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="tab-plan" hidden>
+    <div class="card">
+      <h3 style="color:var(--gold)">All 30 days</h3>
+      <p class="lead">Gold fill shows how much of each day you checked off. Tap a day to open it.</p>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--gold)">Settings</h3>
+      <div class="settings">
+        <label>Day 1 starts on <input type="date" id="startDate"></label>
+        <button class="ghost" id="reset">Clear all check-offs and notes</button>
+      </div>
+    </div>
+    <p class="sync" id="sync">Saved on this device</p>
+  </section>
+</div>
+
+<nav class="tabs" role="tablist"><div>
+  <button role="tab" aria-selected="true" data-tab="today">Today</button>
+  <button role="tab" aria-selected="false" data-tab="goals">Goals</button>
+  <button role="tab" aria-selected="false" data-tab="workout">Workout</button>
+  <button role="tab" aria-selected="false" data-tab="plan">30 days</button>
+</div></nav>
+
+<script>
+(function(){
+// ---------- Content ----------
+const WORKOUTS = [
+  {name:"Lower body A — glutes", lead:"Dumbbells. Rest 45–60 seconds between sets.", ex:[
+    ["Dumbbell Romanian deadlift","Soft knees, push hips back","3 × 12"],
+    ["Dumbbell hip thrust","Back on couch, squeeze 2s at top","3 × 15"],
+    ["Single-leg hip thrust","Back on couch, one foot planted","3 × 10 each"],
+    ["Sumo goblet squat","Wide stance, toes out","3 × 12"],
+    ["Standing glute kickback","Hold a chair for balance","3 × 15 each"],
+    ["Hip thrust pulses","Stay at the top, small pulses","2 × 20"]]},
+  {name:"Upper body + core", lead:"Dumbbells. Keep the core tight the whole time.", ex:[
+    ["Shoulder press","Seated or standing","3 × 10"],
+    ["Bent-over row","Flat back, pull to hip","3 × 12"],
+    ["Push-up","Incline on a counter is fine","3 × 10"],
+    ["Bicep curl","No swinging","3 × 12"],
+    ["Tricep kickback","Elbow stays pinned","3 × 12"],
+    ["Plank","Forearms, straight line","3 × 40 sec"],
+    ["Dead bug","Low back pressed down","3 × 10 each"]]},
+  {name:"Lower body B — legs", lead:"Dumbbells. Rest 45–60 seconds between sets.", ex:[
+    ["Goblet squat","Chest up, sit deep","3 × 12"],
+    ["Reverse lunge","Step back, knee hovers","3 × 10 each"],
+    ["Step-up","Stair or sturdy bench","3 × 10 each"],
+    ["Single-leg Romanian deadlift","Light weight, balance first","3 × 10 each"],
+    ["Calf raise","Pause at the top","3 × 20"],
+    ["Wall sit","Thighs parallel","3 × 40 sec"]]},
+  {name:"Mobility + long walk", lead:"Recovery day. 20 minutes of stretching, then a 45-minute walk.", ex:[
+    ["Hip flexor stretch","Kneeling lunge","60 sec each"],
+    ["Pigeon pose","Opens the glutes","60 sec each"],
+    ["Hamstring stretch","Seated or standing","60 sec each"],
+    ["Cat-cow","Move with your breath","10 slow"],
+    ["Child's pose","Arms long","90 sec"],
+    ["Brisk walk","Add hills if you can","45 min"]]},
+  {name:"Glute burner circuit", lead:"Go through the list once = 1 round. Do 4 rounds, rest 90 seconds between.", ex:[
+    ["Glute bridge","Dumbbell on hips","20"],
+    ["Curtsy lunge","Cross behind","10 each"],
+    ["Sumo squat pulse","Stay low","20"],
+    ["Donkey kick","On all fours","15 each"],
+    ["Fire hydrant","Knee out to the side","15 each"],
+    ["Mountain climbers","Steady pace","30 sec"]]},
+  {name:"Upper body + core", lead:"Same as day 2 — try one more rep than last time.", ref:1},
+  {name:"Rest + stretch", lead:"Real rest. Light stretching and your evening walk only.", ex:[
+    ["Full-body stretch","Whatever feels tight","10 min"],
+    ["Evening walk","Easy pace","30 min"]]}
+];
+const DAILY = {name:"Arms + abs of steel", lead:"Every day, right after your workout. Light dumbbells for arms. About 15 minutes.", ex:[
+  ["Curl to overhead press","Light dumbbells, one smooth move","3 × 12"],
+  ["Chair tricep dip","Hands on a sturdy chair, elbows back","3 × 12"],
+  ["Lateral raise","Lift to shoulder height, slow down","3 × 12"],
+  ["Arm circles","Small, arms straight out","30 sec each way"],
+  ["Crunch","Chin off chest, exhale up","3 × 20"],
+  ["Bicycle crunch","Elbow to opposite knee","3 × 20"],
+  ["Lying leg raise","Low back pressed down","3 × 12"],
+  ["Russian twist","Hold a dumbbell, feet up if you can","3 × 20"],
+  ["Plank","Forearms, squeeze everything","3 × 45 sec"]]};
+const PROGRESSION = [
+  "Week 1: learn the moves. Pick a weight where the last 2 reps are hard.",
+  "Week 2: add 2 reps to every set.",
+  "Week 3: go up in dumbbell weight, back to the listed reps.",
+  "Week 4 + finish: add one extra set to every exercise."
+];
+
+// minutes after midnight
+const SCHEDULE = [
+  {id:"pray", s:360, e:380, kind:"spirit", title:"Morning prayers", desc:"Prayer, gratitude, and today's intention.", note:"Today I'm praying for…"},
+  {id:"k1", s:380, kind:"kegel", title:"Kegels — set 1", desc:"25 reps. Squeeze 3 seconds, release 3 seconds."},
+  {id:"move", s:390, e:435, kind:"body", title:"Workout", desc:"WORKOUT"},
+  {id:"armsabs", s:435, e:450, kind:"body", title:"Arms + abs of steel", desc:"Daily — arm toning and abs, 15 minutes."},
+  {id:"fuel", s:450, e:480, kind:"self", title:"Shower, water, breakfast"},
+  {id:"skool", s:480, e:630, kind:"work", title:"Build the Skool community", desc:"2.5 hours. Curriculum first, then post and personally invite 5 people.", note:"What I built / who I invited"},
+  {id:"k2", s:630, kind:"kegel", title:"Kegels — set 2", desc:"25 reps, then stand up and stretch."},
+  {id:"rl", s:645, e:735, kind:"work", title:"Real Love app", desc:"Ship one thing from the backlog.", note:"What I shipped"},
+  {id:"lunch", s:735, e:780, kind:"self", title:"Lunch and rest"},
+  {id:"books", s:780, e:870, kind:"work", title:"Amazon books", desc:"Write, format, cover, or list — finish one piece.", note:"What I finished"},
+  {id:"content", s:870, e:960, kind:"work", title:"Astrology content", desc:"Script, film, and edit. Batch ahead.", note:"What I made"},
+  {id:"k3", s:960, kind:"kegel", title:"Kegels — set 3", desc:"25 reps."},
+  {id:"post", s:975, e:1020, kind:"work", title:"Post and engage", desc:"Schedule posts, answer comments on TikTok, IG, YouTube."},
+  {id:"free", s:1020, e:1080, kind:"self", title:"Open time", desc:"Family, errands, catch-up."},
+  {id:"dinner", s:1080, e:1140, kind:"self", title:"Dinner"},
+  {id:"walk", s:1140, e:1185, kind:"body", title:"Evening walk", desc:"30–45 minutes."},
+  {id:"k4", s:1200, kind:"kegel", title:"Kegels — set 4", desc:"25 reps. That's 100."},
+  {id:"plan", s:1215, e:1245, kind:"self", title:"Plan tomorrow", desc:"Pick tomorrow's one Real Love task and one book task.", note:"Tomorrow's top task"},
+  {id:"sleep", s:1290, kind:"self", title:"Wind down", desc:"Screens off. Lights out by 10 for the 6:00 start."}
+];
+const KEGEL_IDS = ["k1","k2","k3","k4"];
+
+// One-off days with their own plan (keyed by calendar date)
+const DAY_OVERRIDES = {
+  "2026-10-04": {
+    workout: {name:"Arms + glutes", lead:"Today's custom session, about 45 minutes.", ex:[
+      ["Dumbbell hip thrust","Back on couch, squeeze 2s at top","3 × 15"],
+      ["Single-leg hip thrust","One foot planted","3 × 10 each"],
+      ["Sumo goblet squat","Wide stance, toes out","3 × 12"],
+      ["Standing glute kickback","Hold a chair for balance","3 × 15 each"],
+      ["Hip thrust pulses","Stay at the top","2 × 20"],
+      ["Curl to overhead press","Light dumbbells","3 × 12"],
+      ["Chair tricep dip","Elbows back","3 × 12"],
+      ["Lateral raise","Slow on the way down","3 × 12"],
+      ["Tricep kickback","Elbow stays pinned","3 × 12"],
+      ["Plank","Abs finisher","3 × 45 sec"]]},
+    schedule: [
+      {id:"pray", s:570, e:590, kind:"spirit", title:"Morning prayers", desc:"Set the intention: today I shift my reality.", note:"Today I'm praying for…"},
+      {id:"k1", s:590, kind:"kegel", title:"Kegels — set 1", desc:"25 reps. Squeeze 3 seconds, release 3 seconds."},
+      {id:"move", s:600, e:645, kind:"body", title:"Workout", desc:"WORKOUT"},
+      {id:"fuel", s:675, e:705, kind:"self", title:"Shower, water, eat"},
+      {id:"skool", s:705, e:765, kind:"work", title:"Skool — go over Module 1", desc:"Review the Week 1 lessons. No building or inviting today.", note:"Changes I want"},
+      {id:"store", s:780, e:840, kind:"self", title:"Store run"},
+      {id:"k2", s:840, kind:"kegel", title:"Kegels — set 2", desc:"25 reps."},
+      {id:"robin1", s:845, e:930, kind:"work", title:"Miss Robin's birth chart", desc:"Finish it, then audit placements, houses, and typos.", note:"What's left"},
+      {id:"dinner", s:930, e:1020, kind:"self", title:"Cook dinner for the kids", desc:"Cook and eat together."},
+      {id:"rl", s:1020, e:1095, kind:"work", title:"Real Love app", desc:"Quick win first: redeploy the waitlist. Then one bigger fix.", note:"What I shipped"},
+      {id:"k3", s:1095, kind:"kegel", title:"Kegels — set 3", desc:"25 reps."},
+      {id:"books", s:1110, e:1170, kind:"work", title:"Get my books online", desc:"Walk through publishing on Amazon KDP.", note:"Next step"},
+      {id:"ideas", s:1170, e:1230, kind:"work", title:"Brainstorm astrology Coven ideas", desc:"Open, no pressure. Write everything down.", note:"Best idea"},
+      {id:"k4", s:1230, kind:"kegel", title:"Kegels — set 4", desc:"25 reps. That's 100."},
+      {id:"plan", s:1245, e:1275, kind:"self", title:"Plan tomorrow", desc:"Tomorrow is a full 6:00 start.", note:"Tomorrow's top task"},
+      {id:"sleep", s:1290, kind:"self", title:"Wrap up the day", desc:"Screens off. Lights out by 10 for the 6:00 start."}
+    ]
+  }
+};
+
+// ---------- State ----------
+const todayISO = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+let state = {startDate: todayISO(), days:{}};
+let viewDay = 1, previewWorkout = null, saveTimer = null, dbRef = null;
+
+const LS_KEY = "thirty-day-finish-v1";
+try { const raw = localStorage.getItem(LS_KEY); if (raw) { const p = JSON.parse(raw); if (p && p.days) state = p; } } catch(e){}
+
+function parseISO(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function dateFor(n){ const d=parseISO(state.startDate); d.setDate(d.getDate()+n-1); return d; }
+function currentDay(){ const ms = new Date(todayISO()+"T00:00:00") - parseISO(state.startDate); return Math.round(ms/86400000)+1; }
+function clampDay(n){ return Math.max(1, Math.min(30, n)); }
+function dayData(n){ return state.days[n] || (state.days[n]={c:{},n:{}}); }
+function isoOf(n){ const d=dateFor(n); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function override(n){ return DAY_OVERRIDES[isoOf(n)]||null; }
+function sched(n){ const o=override(n); return (o&&o.schedule)||SCHEDULE; }
+function pct(n){ const d=state.days[n]; if(!d) return 0; const sc=sched(n); const done=sc.filter(i=>d.c[i.id]).length; return done/sc.length; }
+function kegels(n){ const d=state.days[n]; return d ? KEGEL_IDS.filter(k=>d.c[k]).length*25 : 0; }
+function workoutFor(n){ return (n-1)%7; }
+function fmt(min){ let h=Math.floor(min/60), m=min%60; const ap=h>=12?"p":"a"; h=h%12||12; return h+":"+String(m).padStart(2,"0")+ap; }
+function fmtDate(d){ return d.toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"}); }
+
+function save(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){}
+  
+}
+
+// ---------- Render ----------
+function renderRing(){
+  const svg = document.getElementById("ring"), cx=160, cy=160, R=132, cur=currentDay();
+  let out = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+  for (let i=1;i<=30;i++){
+    const a = (i-1)/30*Math.PI*2 - Math.PI/2, x=cx+R*Math.cos(a), y=cy+R*Math.sin(a), p=pct(i);
+    const isView=i===viewDay, isToday=i===cur;
+    out += `<g class="dot" data-day="${i}" role="button" tabindex="0" aria-label="Day ${i}, ${Math.round(p*100)}% done">`;
+    if (isView) out += `<circle cx="${x}" cy="${y}" r="13" fill="none" stroke="var(--gold)" stroke-width="1.5"/>`;
+    out += `<circle cx="${x}" cy="${y}" r="${isToday?8.5:7}" fill="var(--panel2)" stroke="${isToday?'var(--gold)':'var(--line)'}" stroke-width="1"/>`;
+    if (p>0) out += `<circle cx="${x}" cy="${y}" r="${(isToday?8.5:7)*Math.sqrt(p)}" fill="var(--gold)"/>`;
+    out += `</g>`;
+  }
+  const p = Math.round(pct(viewDay)*100);
+  out += `<text x="${cx}" y="${cy-18}" text-anchor="middle" font-size="15" style="fill:var(--muted)">Day</text>`;
+  out += `<text x="${cx}" y="${cy+30}" text-anchor="middle" font-size="64" font-weight="700" style="fill:var(--gold)">${viewDay}</text>`;
+  out += `<text x="${cx}" y="${cy+58}" text-anchor="middle" font-size="14" style="fill:var(--muted);font-family:var(--sans)">${p}% done</text>`;
+  svg.innerHTML = out;
+  svg.querySelectorAll(".dot").forEach(g=>{
+    const go=()=>{ viewDay=+g.dataset.day; render(); };
+    g.addEventListener("click", go);
+    g.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+  });
+}
+
+function renderStats(){
+  let streak=0; const cur=clampDay(currentDay());
+  for (let i=cur;i>=1;i--){ if (pct(i)>=0.8) streak++; else if (i!==cur) break; }
+  let k=0, w=0; for (let i=1;i<=30;i++){ k+=kegels(i); if (state.days[i]&&state.days[i].c.move) w++; }
+  document.getElementById("sStreak").textContent=streak;
+  document.getElementById("sKegel").textContent=k.toLocaleString();
+  document.getElementById("sWork").textContent=w;
+  document.getElementById("dates").textContent = fmtDate(dateFor(1))+" to "+fmtDate(dateFor(30));
+}
+
+function renderToday(){
+  const d=dayData(viewDay), ov=override(viewDay), wo=(ov&&ov.workout)||WORKOUTS[workoutFor(viewDay)];
+  document.getElementById("dayTitle").textContent="Day "+viewDay;
+  const cur=currentDay();
+  document.getElementById("daySub").textContent = fmtDate(dateFor(viewDay)) + (viewDay===cur?" · today":"");
+  document.getElementById("prev").disabled = viewDay<=1;
+  document.getElementById("next").disabled = viewDay>=30;
+
+  const k=kegels(viewDay);
+  document.getElementById("kCount").innerHTML = k+"<small>/100</small>";
+  document.querySelectorAll("#kBar i").forEach((el,i)=>el.classList.toggle("on", !!d.c[KEGEL_IDS[i]]));
+  document.getElementById("kLog").disabled = k>=100;
+  document.getElementById("kLog").textContent = k>=100 ? "Done for today" : "Log a set";
+
+  const m=state.members||0;
+  document.getElementById("mCount").innerHTML = m+"<small>/70</small>";
+  document.getElementById("mMoney").textContent = "$"+(m*7.77).toFixed(2)+" of $543.90 a month";
+  document.getElementById("mBar").style.width = Math.min(100,m/70*100)+"%";
+  document.getElementById("mMinus").disabled = m<=0;
+  const ol=document.getElementById("timeline"); ol.innerHTML="";
+  sched(viewDay).forEach(it=>{
+    const li=document.createElement("li"); li.className="item"+(d.c[it.id]?" done":"");
+    li.style.setProperty("--c", `var(--${it.kind})`);
+    const desc = it.desc==="WORKOUT" ? wo.name : (it.desc||"");
+    const span = it.e ? `${fmt(it.s)}–${fmt(it.e)}` : "";
+    li.innerHTML = `<div class="time">${fmt(it.s)}</div>
+      <button class="check" role="checkbox" aria-checked="${!!d.c[it.id]}" aria-label="${it.title}"></button>
+      <div class="body"><button class="name"></button>${desc?`<div class="desc"></div>`:""}${span?`<div class="span">${span}</div>`:""}</div>`;
+    li.querySelector(".name").textContent=it.title;
+    if (desc) li.querySelector(".desc").textContent=desc;
+    const toggle=()=>{ d.c[it.id]=!d.c[it.id]; save(); render(); };
+    li.querySelector(".check").addEventListener("click", toggle);
+    li.querySelector(".name").addEventListener("click", (it.id==="move"||it.id==="armsabs") ? ()=>{ previewWorkout=null; switchTab("workout"); } : toggle);
+    if (it.note){
+      const inp=document.createElement("input"); inp.className="note"; inp.placeholder=it.note; inp.value=d.n[it.id]||"";
+      inp.setAttribute("aria-label", it.note);
+      inp.addEventListener("input", ()=>{ d.n[it.id]=inp.value; save(); });
+      li.querySelector(".body").appendChild(inp);
+    }
+    ol.appendChild(li);
+  });
+}
+
+function renderWorkout(){
+  const idx = previewWorkout ?? workoutFor(viewDay);
+  const ov = override(viewDay);
+  let wo = (previewWorkout==null && ov && ov.workout) ? ov.workout : WORKOUTS[idx];
+  const ex = wo.ref!=null ? WORKOUTS[wo.ref].ex : wo.ex;
+  const week = Math.min(3, Math.floor((viewDay-1)/7));
+  const card=document.getElementById("woCard");
+  card.innerHTML = `<h3></h3><p class="lead"></p><div class="list"></div>${idx<6&&idx!==3&&wo===WORKOUTS[idx]?`<div class="prog"></div>`:""}`;
+  card.querySelector("h3").textContent = (previewWorkout==null ? "Day "+viewDay+": " : "") + wo.name;
+  card.querySelector(".lead").textContent = wo.lead;
+  const list=card.querySelector(".list");
+  ex.forEach(([n,how,reps])=>{ const r=document.createElement("div"); r.className="ex";
+    r.innerHTML=`<span></span><span></span>`; r.children[0].textContent=n;
+    const h=document.createElement("span"); h.className="how"; h.textContent=how; r.children[0].appendChild(h);
+    r.children[1].textContent=reps; list.appendChild(r); });
+  const dc=document.getElementById("dailyCard");
+  dc.innerHTML=`<h3></h3><p class="lead"></p><div class="list"></div>`;
+  dc.querySelector("h3").textContent=DAILY.name; dc.querySelector(".lead").textContent=DAILY.lead;
+  DAILY.ex.forEach(([n,how,reps])=>{ const r=document.createElement("div"); r.className="ex";
+    r.innerHTML=`<span></span><span></span>`; r.children[0].textContent=n;
+    const h=document.createElement("span"); h.className="how"; h.textContent=how; r.children[0].appendChild(h);
+    r.children[1].textContent=reps; dc.querySelector(".list").appendChild(r); });
+  const pg=card.querySelector(".prog"); if (pg) pg.textContent = PROGRESSION[week];
+  const rot=document.getElementById("rot"); rot.innerHTML="";
+  WORKOUTS.forEach((w,i)=>{ const b=document.createElement("button");
+    b.setAttribute("aria-current", String(i===idx));
+    b.innerHTML=`<span></span><small>Day ${i+1}, ${i+8}, ${i+15}, ${i+22}${i+29<=30?", "+(i+29):""}</small>`;
+    b.children[0].textContent=w.name;
+    b.addEventListener("click", ()=>{ previewWorkout = (i===workoutFor(viewDay)) ? null : i; renderWorkout(); });
+    rot.appendChild(b); });
+}
+
+function renderPlan(){
+  const g=document.getElementById("grid"); g.innerHTML=""; const cur=currentDay();
+  for (let i=1;i<=30;i++){ const c=document.createElement("button"); c.className="cell"+(i>cur?" future":"");
+    c.setAttribute("aria-current", String(i===viewDay)); c.setAttribute("aria-label","Day "+i);
+    const dt=dateFor(i);
+    c.innerHTML=`<span class="fill" style="height:${pct(i)*100}%"></span><b>${i}</b><em>${dt.toLocaleDateString(undefined,{month:"short",day:"numeric"})}</em>`;
+    c.addEventListener("click", ()=>{ viewDay=i; switchTab("today"); });
+    g.appendChild(c); }
+  document.getElementById("startDate").value = state.startDate;
+}
+
+function renderGoals(){
+  const d=dayData(viewDay); if(!d.g) d.g=[{t:"",x:false},{t:"",x:false},{t:"",x:false}];
+  const box=document.getElementById("goals"); box.innerHTML="";
+  const ph=["Most important thing today","Second goal","Third goal"];
+  d.g.forEach((g,i)=>{
+    const row=document.createElement("div"); row.className="goal"+(g.x?" done":"");
+    row.innerHTML=`<span class="num">${i+1}</span><button class="check" role="checkbox" aria-checked="${g.x}" aria-label="Goal ${i+1} done"></button><input>`;
+    const inp=row.querySelector("input"); inp.value=g.t; inp.placeholder=ph[i]; inp.setAttribute("aria-label","Goal "+(i+1));
+    inp.addEventListener("input", ()=>{ g.t=inp.value; save(); });
+    row.querySelector(".check").addEventListener("click", ()=>{ g.x=!g.x; save(); renderGoals(); });
+    box.appendChild(row);
+  });
+  const n=d.g.filter(g=>g.x).length;
+  document.getElementById("goalsDone").textContent = n===3 ? "All three done. That's a win." : n+" of 3 done";
+}
+function render(){ renderRing(); renderStats(); renderToday(); renderGoals(); renderWorkout(); renderPlan(); }
+
+function switchTab(t){
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
+  ["today","goals","workout","plan"].forEach(x=>document.getElementById("tab-"+x).hidden = x!==t);
+  render(); window.scrollTo({top: document.querySelector(".daynav").offsetTop-10});
+}
+
+// ---------- Events ----------
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click", ()=>{ previewWorkout=null; switchTab(b.dataset.tab); }));
+document.getElementById("prev").addEventListener("click", ()=>{ viewDay=clampDay(viewDay-1); previewWorkout=null; render(); });
+document.getElementById("next").addEventListener("click", ()=>{ viewDay=clampDay(viewDay+1); previewWorkout=null; render(); });
+document.getElementById("kLog").addEventListener("click", ()=>{ const d=dayData(viewDay); const k=KEGEL_IDS.find(x=>!d.c[x]); if(k){ d.c[k]=true; save(); render(); } });
+document.getElementById("mPlus").addEventListener("click", ()=>{ state.members=(state.members||0)+1; save(); render(); });
+document.getElementById("mMinus").addEventListener("click", ()=>{ state.members=Math.max(0,(state.members||0)-1); save(); render(); });
+document.getElementById("startDate").addEventListener("change", e=>{ if(e.target.value){ state.startDate=e.target.value; viewDay=clampDay(currentDay()); save(); render(); } });
+document.getElementById("reset").addEventListener("click", ()=>{ if (confirm("Clear every check-off and note for all 30 days?")){ state.days={}; save(); render(); } });
+
+viewDay = clampDay(currentDay());
+render();
+
+// ---------- Offline support ----------
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+})();
+</script>
+</body>
+</html>
